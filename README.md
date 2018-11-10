@@ -1,6 +1,13 @@
 # 說明
 > 基於Vue-ClI
-> 集成了Vue + Vuex + Vue-router模板 + Sass/Scss + normalize.css
+此包集成了
+Vue.js
+Vuex
+Vue-router
+Sass/Scss
+normalize.css
+Element UI
+並兼容IE9以上
 
 ## 學習Vue參考資料
 

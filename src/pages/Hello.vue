@@ -15,7 +15,6 @@
 export default {
   data () {
     return {
-    
     }
   },
   beforeCreate(){
@@ -24,9 +23,7 @@ export default {
   beforeDestroy(){
     document.getElementsByTagName("body")[0].classList.remove("HelloBackGround");
   },
-
-  methods:{
-  }
+ 
 }
 </script>
 

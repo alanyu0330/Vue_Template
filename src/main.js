@@ -2,10 +2,16 @@ import Vue from 'vue'
 import App from './App'
 import VueRouter from 'vue-router'
 import routes from './router'
-import store from './store';
-import 'normalize.css';
-// init
+import store from './store'
+import 'normalize.css'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import 'babel-polyfill';
+
+//注入
+Vue.use(ElementUI)
 Vue.use(VueRouter)
+
 const router = new VueRouter({
   routes,
   mode: 'history',
