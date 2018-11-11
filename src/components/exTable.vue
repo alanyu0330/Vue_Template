@@ -2,7 +2,9 @@
     <div id="exTable">
          <el-row>
             <el-col :span="24" align="left">
-                投注时间:
+                <span :style="`color:${_DateLabelColor};`">
+                    {{_DateLabel}}
+                </span>
                 <el-date-picker
                     v-model="dateRange" type="daterange" align="right" unlink-panels
                     range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
@@ -27,7 +29,7 @@
          <el-row style="margin-top:20px;margin-bottom:15px;">
             <el-col :span="24" align="right">
                 <el-button style="margin-right:20px;" type="primary" icon="el-icon-search" @click="searchClick()">
-                  查找
+                  {{_SearchLabel}}
                 </el-button>
             </el-col>
         </el-row>
@@ -44,7 +46,7 @@
         </el-pagination>
 
         <el-table
-            :data="_tableData"
+            :data="tableData"
             border
             style="width: 100%"
             :summary-method="getSummaries" :show-summary="isShowSum">
@@ -54,6 +56,17 @@
                 :label="it.label"
                 :width="typeof it.width!='undefined'?it.width:''"
                 :sortable="typeof it.sortable!='undefined'?it.sortable:false">
+                    <template slot-scope="scope">
+                        <el-button v-if="typeof it.clickHandle!='undefined'?it.clickHandle:false"
+                        @click.native.prevent="tableDataClickHandle(scope.$index,scope.row)"
+                        type="text"
+                        size="small">
+                            {{scope['row'][it.prop]}}
+                        </el-button>
+                        <span v-else>
+                            {{scope['row'][it.prop]}}
+                        </span>
+                    </template>
             </el-table-column>
         </el-table>
 
@@ -108,6 +121,14 @@
  * @name SearchHandle
  * 當點擊"查找"按鈕的回調
 */
+/** 
+ * @name TableClickHandle
+ * Table內容點擊回調事件
+ * @return  {Number,Object,Number} curIndex  rowData originIndex
+ * curIndex:選中的row Index,依據排序後的Index 
+ * rowData :選中的row 所有資料
+ * originIndex:選中的row Index,依據'未排序前'的Index
+*/
 export default {
     props:{
         //table標題定義
@@ -115,15 +136,27 @@ export default {
             _titleData:
             [{
                 prop:'game_code',
+                @description :
+                    對應_tableData中的Key,決定資料顯示在哪一個欄位
+
                 label:'彩种代码',
-                sortable:true,  //如果填true 那欄位擁有排序功能,不填則無
+                @description :
+                    Title裡面的內容
+
+                sortable:true,  
+                @description :
+                    如果填true 欄位擁有排序功能,不填則無
+
+                clickHandle:true, 
+                @description :
+                    如果填true 欄位可監聽TableClickHandle點擊事件,不填則無
             },],
         */
         _titleData:{
             type:Array,
         },
 
-        //table內容定義
+        //table內容定義，此欄位資料會被排序。
         /**
            _tableData:
             [{
@@ -136,15 +169,17 @@ export default {
             type:Array,
         },
 
-        /** 幫table欄位內容做加總
-        [{
-                date: '2018-11-01',
-                name: '---',
-                province: '---',
-                city: '台北市',
-                address: '北投',
-                zip: 9487
-            }]
+        /** table底部Row欄位，此欄位資料不會被排序。
+            footerData:[
+                [{
+                    date: '當前頁面',
+                    name: '---',
+                    province: '---',
+                    city: '---',
+                    address: '---',
+                    zip: 9487
+                }],
+            ]
         */
         _footerData:{
             type:Array,
@@ -168,13 +203,35 @@ export default {
             type:Number,
             default:-1
         },
+
+        //*傳入一頁顯示幾筆,不傳入的話預設為20筆
         _pageSize:{
             type:Number,
             default:20,
-        }
+        },
+
+        //*選擇日期組件前面的Label
+        _DateLabel:{
+            type:String,
+            default:'时间范围: '  
+        },
+        
+        //*選擇日期組件前面的Label顏色
+        _DateLabelColor:{
+            type:String,
+            default:'black'
+        },
+
+        //*搜寻按鈕上的文字
+        _SearchLabel:{
+            type:String,
+            default:'搜寻'  
+        },
+
     },
     data(){
         return{
+            tableData:this._tableData,
             isShowSum:false,
             dateRange:null,
             wjorderId:"",
@@ -252,11 +309,16 @@ export default {
         },
         _pageTotal(){
             this.pagerJudge();
+        },
+        _tableData()
+        {
+           this.tableDataAddOriginRowIndex();
         }
     },
     created(){
         this.isShowSumJudge();
         this.pagerJudge();
+        this.tableDataAddOriginRowIndex();
     },
     filters: {
         NumFormat: function(val) {
@@ -264,6 +326,20 @@ export default {
         }
     },
     methods:{
+        tableDataAddOriginRowIndex(){
+            if(typeof this._tableData[0]['__OriginRowIndex']!='undefined')
+            {
+                throw "_tableData '__OriginRowIndex' is Key Word,please change Name."
+                return;
+            }
+            this.tableData=this._tableData;
+            for(let i=0;i<this.tableData.length;i++)
+                this.tableData[i]['__OriginRowIndex']=i;
+        },
+        tableDataClickHandle(index,rowData)
+        {
+             this.$emit("TableClickHandle",index,rowData,rowData.__OriginRowIndex);
+        },
         searchClick(){
             this.$emit("SearchHandle");
         },

@@ -4,7 +4,9 @@
             class="tableStyle"
             :_titleData="titleData"
             :_tableData="tableData"
-            :_footerData="footerData">
+            :_footerData="footerData"
+            :_DateLabelColor="'white'"
+            @TableClickHandle="tableClickHandle">
 
         </ex-table>
     </div>
@@ -27,6 +29,7 @@ export default {
                 {
                     prop:'name',
                     label:'姓名',
+                    clickHandle:true,
                 },
                 {
                     prop:'province',
@@ -52,7 +55,7 @@ export default {
                 province: '襄陽',
                 city: '中國',
                 address: '上海市普陀区金沙江路 1520 弄',
-                zip: 200338
+                zip: 200338,
             }, {
                 date: '2016-05-02',
                 name: '楊過',
@@ -102,7 +105,10 @@ export default {
         document.getElementsByTagName("body")[0].classList.remove("ShowTableBackGround");
     },
     methods:{
-
+        tableClickHandle(index,row,originIndex)
+        {
+            console.log("ShowTable",index,row,originIndex);
+        }
     }
 }
 </script>
